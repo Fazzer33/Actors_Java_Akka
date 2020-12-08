@@ -9,11 +9,11 @@ public class Main {
     public static void main(String[] args) {
 
         //#actor-system
-//        final ActorSystem<GreeterMain.SayHello> greeterMain = ActorSystem.create(GreeterMain.create(), "helloakka");
+        final ActorSystem<BlackboardMain.SendNotification> notificationMain = ActorSystem.create(BlackboardMain.create(), "automationSystem");
         //#actor-system
 
         //#main-send-messages
-//        greeterMain.tell(new GreeterMain.SayHello("Charles"));
+        notificationMain.tell(new BlackboardMain.SendNotification("test"));
         //#main-send-messages
 
         try {
@@ -21,7 +21,7 @@ public class Main {
             System.in.read();
         } catch (IOException ignored) {
         } finally {
-//            greeterMain.terminate();
+            notificationMain.terminate();
         }
     }
 }
