@@ -9,10 +9,10 @@ import at.fhv.sysarch.lab3.actors.Actor;
 
 public class MediaStation extends AbstractBehavior<Notifier.Notified> {
     private Actor actor;
-    private int notifyCounter;
+    private boolean isPlaying = false;
 
     public static Behavior<Notifier.Notified> create() {
-        return Behaviors.setup(context -> new MediaStation(context));
+        return Behaviors.setup(MediaStation::new);
     }
 
     public MediaStation(ActorContext<Notifier.Notified> context) {
@@ -26,12 +26,16 @@ public class MediaStation extends AbstractBehavior<Notifier.Notified> {
     }
 
     private Behavior<Notifier.Notified> onNotified(Notifier.Notified message) {
-        notifyCounter++;
-        getContext().getLog().info(message.whom);
-        if (notifyCounter == 1) {
+        if (message.whom.equals("stop")) {
+            isPlaying = false;
             return Behaviors.stopped();
-        } else {
+        } else if (message.whom.equals("movie") && !isPlaying) {
+            isPlaying = true;
+            getContext().getLog().info(message.whom);
             message.from.tell(new Notifier.Notify(message.whom, getContext().getSelf()));
+            return this;
+        } else {
+            System.out.println("movie already playing");
             return this;
         }
     }

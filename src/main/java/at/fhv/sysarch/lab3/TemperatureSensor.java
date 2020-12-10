@@ -4,14 +4,14 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Receive;
 
-public class TemperatureSensor extends AbstractBehavior<String> {
+public class TemperatureSensor extends AbstractBehavior<Double> {
 
-    public TemperatureSensor(ActorContext<String> context) {
+    public TemperatureSensor(ActorContext<Double> context) {
         super(context);
     }
 
     @Override
-    public Receive<String> createReceive() {
+    public Receive<Double> createReceive() {
         return null;
     }
 }

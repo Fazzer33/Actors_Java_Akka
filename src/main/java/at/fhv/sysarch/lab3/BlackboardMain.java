@@ -7,9 +7,13 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab3.actors.Actor;
+import at.fhv.sysarch.lab3.environment.TemperatureSimulator;
+import java.util.HashMap;
+
 
 public class BlackboardMain extends AbstractBehavior<BlackboardMain.SendNotification> {
 
+    protected HashMap<Actor, SendNotification> actorMap = new HashMap<>();
 
     public static class SendNotification {
         public final Actor actor;
@@ -44,6 +48,12 @@ public class BlackboardMain extends AbstractBehavior<BlackboardMain.SendNotifica
         if (command.actor == Actor.MEDIA_STATION) {
             ActorRef<Notifier.Notified> forwardTo =
                     getContext().spawn(MediaStation.create(), command.notification);
+            notifier.tell(new Notifier.Notify(command.notification, forwardTo));
+        }
+
+        if (command.actor == Actor.TEMPERATURE_SIMULATOR) {
+            ActorRef<Notifier.Notified> forwardTo =
+                    getContext().spawn(TemperatureSimulator.create(), command.notification);
             notifier.tell(new Notifier.Notify(command.notification, forwardTo));
         }
         //#create-actors
