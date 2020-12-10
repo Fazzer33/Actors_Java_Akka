@@ -5,9 +5,10 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import at.fhv.sysarch.lab3.actors.Actor;
 
 public class MediaStation extends AbstractBehavior<Notifier.Notified> {
-
+    private Actor actor;
     private int notifyCounter;
 
     public static Behavior<Notifier.Notified> create() {
@@ -16,6 +17,7 @@ public class MediaStation extends AbstractBehavior<Notifier.Notified> {
 
     public MediaStation(ActorContext<Notifier.Notified> context) {
         super(context);
+        this.actor = Actor.MEDIA_STATION;
     }
 
     @Override

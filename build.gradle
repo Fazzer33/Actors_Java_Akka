@@ -14,8 +14,3 @@ dependencies {
     implementation group: 'com.typesafe.akka', name: 'akka-actor-typed_2.13', version: '2.6.6'
     implementation 'ch.qos.logback:logback-classic:1.2.3'
 }
-
-//application {
-//    // Define the main class for the application.
-//    mainClassName = ''
-//}

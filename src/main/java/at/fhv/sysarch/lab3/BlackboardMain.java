@@ -6,13 +6,17 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import at.fhv.sysarch.lab3.actors.Actor;
 
 public class BlackboardMain extends AbstractBehavior<BlackboardMain.SendNotification> {
 
+
     public static class SendNotification {
+        public final Actor actor;
         public final String notification;
 
-        public SendNotification(String notification) {
+        public SendNotification(Actor actor, String notification) {
+            this.actor = actor;
             this.notification = notification;
         }
     }
@@ -37,9 +41,11 @@ public class BlackboardMain extends AbstractBehavior<BlackboardMain.SendNotifica
 
     private Behavior<SendNotification> onSendNotification(SendNotification command) {
         //#create-actors
-        ActorRef<Notifier.Notified> forwardTo =
-                getContext().spawn(MediaStation.create(), command.notification);
-        notifier.tell(new Notifier.Notify(command.notification, forwardTo));
+        if (command.actor == Actor.MEDIA_STATION) {
+            ActorRef<Notifier.Notified> forwardTo =
+                    getContext().spawn(MediaStation.create(), command.notification);
+            notifier.tell(new Notifier.Notify(command.notification, forwardTo));
+        }
         //#create-actors
         return this;
     }

@@ -1,6 +1,7 @@
 package at.fhv.sysarch.lab3;
 
 import akka.actor.typed.ActorSystem;
+import at.fhv.sysarch.lab3.actors.Actor;
 
 import java.io.IOException;
 
@@ -13,7 +14,7 @@ public class Main {
         //#actor-system
 
         //#main-send-messages
-        notificationMain.tell(new BlackboardMain.SendNotification("test"));
+        notificationMain.tell(new BlackboardMain.SendNotification(Actor.MEDIA_STATION, "test"));
         //#main-send-messages
 
         try {
