@@ -13,7 +13,8 @@ import java.util.HashMap;
 
 public class BlackboardMain extends AbstractBehavior<BlackboardMain.SendNotification> {
 
-    protected HashMap<Actor, SendNotification> actorMap = new HashMap<>();
+    // save actor ref
+    protected HashMap<Actor, ActorRef> actorRefMap = new HashMap<>();
 
     public static class SendNotification {
         public final Actor actor;
@@ -45,10 +46,15 @@ public class BlackboardMain extends AbstractBehavior<BlackboardMain.SendNotifica
 
     private Behavior<SendNotification> onSendNotification(SendNotification command) {
         //#create-actors
-        if (command.actor == Actor.MEDIA_STATION) {
+        if (command.actor == Actor.MEDIA_STATION && actorRefMap.get(Actor.MEDIA_STATION) == null) {
+            System.out.println("Media station don't exist");
             ActorRef<Notifier.Notified> forwardTo =
                     getContext().spawn(MediaStation.create(), command.notification);
-            notifier.tell(new Notifier.Notify(command.notification, forwardTo));
+            actorRefMap.put(Actor.MEDIA_STATION, forwardTo);
+
+        } else if (actorRefMap.get(Actor.MEDIA_STATION) != null){
+            System.out.println("Media station exists");
+            notifier.tell(new Notifier.Notify(command.notification, actorRefMap.remove(Actor.MEDIA_STATION)));
         }
 
         if (command.actor == Actor.TEMPERATURE_SIMULATOR) {
