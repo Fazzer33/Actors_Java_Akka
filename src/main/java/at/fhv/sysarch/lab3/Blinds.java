@@ -44,9 +44,10 @@ public class Blinds extends AbstractBehavior<Notifier.Notified> {
 
         } else if (message.whom.equals(Actions.OPEN.action)){
             System.out.println("Blinds are getting opened");
-            return Behaviors.stopped();
+            getContext().getLog().info(message.whom);
+            areOpen = true;
+            return this;
         } else {
-            System.out.println("Blinds are already closed");
             return this;
         }
     }

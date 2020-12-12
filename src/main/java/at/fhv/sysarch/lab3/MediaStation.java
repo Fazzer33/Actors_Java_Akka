@@ -37,14 +37,16 @@ public class MediaStation extends AbstractBehavior<Notifier.Notified> {
     private Behavior<Notifier.Notified> onNotified(Notifier.Notified message) {
         if (message.whom.equals(Actions.TURN_OFF.action)) {
             isPlaying = false;
-            return Behaviors.stopped();
+            System.out.println("MediaStation turning off...");
+            getContext().getLog().info(message.whom);
+            return this;
         } else if (message.whom.equals(Actions.START.action) && !isPlaying) {
             isPlaying = true;
+            System.out.println("MediaStation is starting...");
             getContext().getLog().info(message.whom);
             message.from.tell(new Notifier.Notify(message.whom, getContext().getSelf()));
             return this;
         } else {
-            System.out.println("movie already playing");
             return this;
         }
     }

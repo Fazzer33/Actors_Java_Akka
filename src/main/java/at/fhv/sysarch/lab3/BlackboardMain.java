@@ -36,6 +36,10 @@ public class BlackboardMain extends AbstractBehavior<BlackboardMain.SendNotifica
         super(context);
         //#create-actors
         notifier = context.spawn(Notifier.create(), "notifier");
+
+        actorRefMap.put(Actor.MEDIA_STATION, getContext().spawn(MediaStation.create(), "mediaStation"));
+        actorRefMap.put(Actor.BLINDS, getContext().spawn(Blinds.create(), "blinds"));
+
         //#create-actors
     }
 
@@ -48,30 +52,12 @@ public class BlackboardMain extends AbstractBehavior<BlackboardMain.SendNotifica
         //#create-actors
         // MEDIA_STATION
         if (command.actor == Actor.MEDIA_STATION) {
-            if (actorRefMap.get(Actor.MEDIA_STATION) == null) {
-                System.out.println("Media station don't exist");
-                ActorRef<Notifier.Notified> forwardTo =
-                        getContext().spawn(MediaStation.create(), command.notification);
-                actorRefMap.put(Actor.MEDIA_STATION, forwardTo);
-
-            } else if (actorRefMap.get(Actor.MEDIA_STATION) != null){
-                System.out.println("Media station exists");
-                notifier.tell(new Notifier.Notify(command.notification, actorRefMap.remove(Actor.MEDIA_STATION)));
-            }
+            notifier.tell(new Notifier.Notify(command.notification, actorRefMap.get(Actor.MEDIA_STATION)));
         }
 
         //BLINDS
         if (command.actor == Actor.BLINDS) {
-            if (actorRefMap.get(Actor.BLINDS) == null) {
-                System.out.println("Blinds don't exist");
-                ActorRef<Notifier.Notified> forwardTo =
-                        getContext().spawn(Blinds.create(), command.notification);
-                actorRefMap.put(Actor.BLINDS, forwardTo);
-
-            } else if (actorRefMap.get(Actor.BLINDS) != null){
-                System.out.println("Blinds exists");
-                notifier.tell(new Notifier.Notify(command.notification, actorRefMap.remove(Actor.BLINDS)));
-            }
+            notifier.tell(new Notifier.Notify(command.notification, actorRefMap.get(Actor.BLINDS)));
         }
         
         if (command.actor == Actor.TEMPERATURE_SIMULATOR) {
