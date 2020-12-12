@@ -8,6 +8,15 @@ import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab3.actors.Actor;
 
 public class MediaStation extends AbstractBehavior<Notifier.Notified> {
+   public enum Actions {
+       START("start_film"), TURN_OFF("end");
+
+       public final String action;
+       Actions(String action) {
+           this.action = action;
+       }
+   }
+
     private Actor actor;
     private boolean isPlaying = false;
 
@@ -26,10 +35,10 @@ public class MediaStation extends AbstractBehavior<Notifier.Notified> {
     }
 
     private Behavior<Notifier.Notified> onNotified(Notifier.Notified message) {
-        if (message.whom.equals("stop")) {
+        if (message.whom.equals(Actions.TURN_OFF.action)) {
             isPlaying = false;
             return Behaviors.stopped();
-        } else if (message.whom.equals("movie") && !isPlaying) {
+        } else if (message.whom.equals(Actions.START.action) && !isPlaying) {
             isPlaying = true;
             getContext().getLog().info(message.whom);
             message.from.tell(new Notifier.Notify(message.whom, getContext().getSelf()));

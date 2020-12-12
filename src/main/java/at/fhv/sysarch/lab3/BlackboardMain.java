@@ -46,17 +46,34 @@ public class BlackboardMain extends AbstractBehavior<BlackboardMain.SendNotifica
 
     private Behavior<SendNotification> onSendNotification(SendNotification command) {
         //#create-actors
-        if (command.actor == Actor.MEDIA_STATION && actorRefMap.get(Actor.MEDIA_STATION) == null) {
-            System.out.println("Media station don't exist");
-            ActorRef<Notifier.Notified> forwardTo =
-                    getContext().spawn(MediaStation.create(), command.notification);
-            actorRefMap.put(Actor.MEDIA_STATION, forwardTo);
+        // MEDIA_STATION
+        if (command.actor == Actor.MEDIA_STATION) {
+            if (actorRefMap.get(Actor.MEDIA_STATION) == null) {
+                System.out.println("Media station don't exist");
+                ActorRef<Notifier.Notified> forwardTo =
+                        getContext().spawn(MediaStation.create(), command.notification);
+                actorRefMap.put(Actor.MEDIA_STATION, forwardTo);
 
-        } else if (actorRefMap.get(Actor.MEDIA_STATION) != null){
-            System.out.println("Media station exists");
-            notifier.tell(new Notifier.Notify(command.notification, actorRefMap.remove(Actor.MEDIA_STATION)));
+            } else if (actorRefMap.get(Actor.MEDIA_STATION) != null){
+                System.out.println("Media station exists");
+                notifier.tell(new Notifier.Notify(command.notification, actorRefMap.remove(Actor.MEDIA_STATION)));
+            }
         }
 
+        //BLINDS
+        if (command.actor == Actor.BLINDS) {
+            if (actorRefMap.get(Actor.BLINDS) == null) {
+                System.out.println("Blinds don't exist");
+                ActorRef<Notifier.Notified> forwardTo =
+                        getContext().spawn(Blinds.create(), command.notification);
+                actorRefMap.put(Actor.BLINDS, forwardTo);
+
+            } else if (actorRefMap.get(Actor.BLINDS) != null){
+                System.out.println("Blinds exists");
+                notifier.tell(new Notifier.Notify(command.notification, actorRefMap.remove(Actor.BLINDS)));
+            }
+        }
+        
         if (command.actor == Actor.TEMPERATURE_SIMULATOR) {
             ActorRef<Notifier.Notified> forwardTo =
                     getContext().spawn(TemperatureSimulator.create(), command.notification);

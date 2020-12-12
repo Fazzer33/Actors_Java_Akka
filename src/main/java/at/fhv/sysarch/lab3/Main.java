@@ -1,5 +1,6 @@
 package at.fhv.sysarch.lab3;
 
+import akka.actor.ActorRef;
 import akka.actor.typed.ActorSystem;
 import at.fhv.sysarch.lab3.actors.Actor;
 import java.io.InputStreamReader;
@@ -46,15 +47,25 @@ public class Main {
 
                     switch(line) {
                         case 1:
-                            System.out.println("MediaStation is starting...");
                             //#main-send-messages
-                            notificationMain.tell(new BlackboardMain.SendNotification(Actor.MEDIA_STATION, "movie"));
+                            // inform MediaStation
+                            notificationMain.tell(new BlackboardMain.SendNotification(Actor.MEDIA_STATION, MediaStation.Actions.START.action));
+                            System.out.println("MediaStation is starting...");
+
+                            // inform Blinds
+                            notificationMain.tell(new BlackboardMain.SendNotification(Actor.BLINDS, Blinds.Actions.CLOSE.action));
+                            System.out.println("Blinds are getting closed");
+
                             //#main-send-messages
                             break;
                         case 2:
                             System.out.println("MediaStation turning off...");
                             //#main-send-messages
-                            notificationMain.tell(new BlackboardMain.SendNotification(Actor.MEDIA_STATION, "stop"));
+                            notificationMain.tell(new BlackboardMain.SendNotification(Actor.MEDIA_STATION, MediaStation.Actions.TURN_OFF.action));
+
+                            // inform Blinds
+                            notificationMain.tell(new BlackboardMain.SendNotification(Actor.BLINDS, Blinds.Actions.OPEN.action));
+                            System.out.println("Blinds are getting opened");
                             //#main-send-messages
                             break;
                     }
