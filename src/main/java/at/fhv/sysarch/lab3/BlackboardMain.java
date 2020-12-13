@@ -76,10 +76,10 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
 
     private Behavior<INotification> onTempNotification(TempNotification command) {
 
-        if (command.getTemperature() <= 20) {
+        if (command.getTemperature() > 20) {
             notifier.tell(new Notifier.Notify(AC.Actions.AC_ON.action, actorRefMap.get(Actor.AC)));
         }
-        if (command.getTemperature() > 20) {
+        if (command.getTemperature() < 20) {
             // turn on AC and start cooling
             notifier.tell(new Notifier.Notify(AC.Actions.AC_OFF.action, actorRefMap.get(Actor.AC)));
         }

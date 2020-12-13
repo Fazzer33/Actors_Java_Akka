@@ -18,7 +18,7 @@ public class AC extends AbstractBehavior<Notifier.Notified> {
         }
     }
 
-    private boolean running = true;
+    private boolean running = false;
     private Actor actor;
 
     public AC(ActorContext<Notifier.Notified> context) {
