@@ -1,11 +1,8 @@
 package at.fhv.sysarch.lab3;
 
-import akka.actor.ActorRef;
 import akka.actor.typed.ActorSystem;
 import at.fhv.sysarch.lab3.actors.Actor;
 import java.io.InputStreamReader;
-import java.text.NumberFormat;
-import java.util.Random;
 import java.util.Scanner;
 
 
@@ -18,8 +15,6 @@ public class Main {
         //#actor-system
         Scanner sc = new Scanner(new InputStreamReader(System.in));
 
-
-        notificationMain.tell(new BlackboardMain.SendNotification(Actor.TEMPERATURE_SIMULATOR, "start"));
 
         int line = 0;
         while (running) {
