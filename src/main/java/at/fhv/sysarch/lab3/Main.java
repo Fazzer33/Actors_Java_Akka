@@ -2,6 +2,11 @@ package at.fhv.sysarch.lab3;
 
 import akka.actor.typed.ActorSystem;
 import at.fhv.sysarch.lab3.actors.Actor;
+import at.fhv.sysarch.lab3.blinds.Blinds;
+import at.fhv.sysarch.lab3.blinds.BlindsNotification;
+import at.fhv.sysarch.lab3.mediaStation.MediaStation;
+import at.fhv.sysarch.lab3.mediaStation.MediaStationNotification;
+
 import java.io.InputStreamReader;
 import java.util.Scanner;
 
@@ -44,19 +49,19 @@ public class Main {
                         case 1:
                             //#main-send-messages
                             // inform MediaStation
-                            notificationMain.tell(new BlackboardMain.SendNotification(Actor.MEDIA_STATION, MediaStation.Actions.START.action));
+                            notificationMain.tell(new MediaStationNotification(MediaStation.Actions.START.action));
 
                             // inform Blinds
-                            notificationMain.tell(new BlackboardMain.SendNotification(Actor.BLINDS, Blinds.Actions.CLOSE.action));
+                            notificationMain.tell(new BlindsNotification(Blinds.Actions.CLOSE.action));
 
                             //#main-send-messages
                             break;
                         case 2:
                             //#main-send-messages
-                            notificationMain.tell(new BlackboardMain.SendNotification(Actor.MEDIA_STATION, MediaStation.Actions.TURN_OFF.action));
+                            notificationMain.tell(new MediaStationNotification(MediaStation.Actions.TURN_OFF.action));
 
                             // inform Blinds
-                            notificationMain.tell(new BlackboardMain.SendNotification(Actor.BLINDS, Blinds.Actions.OPEN.action));
+                            notificationMain.tell(new BlindsNotification(Blinds.Actions.OPEN.action));
                             //#main-send-messages
                             break;
                     }
@@ -68,7 +73,7 @@ public class Main {
                 case 5:
                     System.out.println("Program ending...");
                     running = false;
-                    notificationMain.terminate();
+                    System.exit(0);
                 default:
                     System.out.println("Not a valid option!");
                     break;

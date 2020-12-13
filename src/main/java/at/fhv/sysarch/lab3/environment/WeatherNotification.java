@@ -13,4 +13,6 @@ public class WeatherNotification implements INotification {
     public void setWeather(Weather weather) {
         this.weather = weather;
     }
+
+
 }

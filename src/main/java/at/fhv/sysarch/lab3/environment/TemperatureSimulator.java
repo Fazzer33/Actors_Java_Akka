@@ -16,6 +16,7 @@ public class TemperatureSimulator extends AbstractBehavior<TempNotification> {
 
     private ActorRef<TempNotification> forwardTo;
     private Actor actor;
+    private boolean isAcOn = false;
     private double currentTemp = 22;
 
 
@@ -36,28 +37,36 @@ public class TemperatureSimulator extends AbstractBehavior<TempNotification> {
     }
 
     private Behavior<TempNotification> onReadTemperatureValue(TempNotification temp) {
-        TempNotification tempNotification = new TempNotification();
-        currentTemp = currentTemp + calcRandomTemp();
-        tempNotification.setTemperature(currentTemp);
-        getContext().getSystem().scheduler().scheduleOnce(
-                Duration.ofMillis(5000),
-                () -> getContext().getSelf().tell(tempNotification),
-                getContext().getSystem().dispatchers().lookup(DispatcherSelector.defaultDispatcher()));
-        forwardTo.tell(temp);
 
-        System.out.println(currentTemp);
+        if (temp.checkOnAcNotification()) {
+            isAcOn = temp.checkIfAcOn();
+        } else {
+            System.out.println(temp.checkIfAcOn());
+
+            TempNotification tempNotification = new TempNotification();
+            currentTemp = currentTemp + calcRandomTemp();
+            tempNotification.setTemperature(currentTemp);
+            getContext().getSystem().scheduler().scheduleOnce(
+                    Duration.ofMillis(20000),
+                    () -> getContext().getSelf().tell(tempNotification),
+                    getContext().getSystem().dispatchers().lookup(DispatcherSelector.defaultDispatcher()));
+            forwardTo.tell(temp);
+
+            System.out.println(currentTemp);
+        }
         return Behaviors.same();
     }
 
     private Double calcRandomTemp() {
+        System.out.println("ac on?: "+isAcOn);
         double MIN = -1;
         double MAX = 1;
         Random random = new Random();
-        double rand = (MIN + (MAX - MIN) * random.nextDouble());
-//        NumberFormat nf = NumberFormat.getInstance();
-//        nf.setMaximumFractionDigits(2);
-//        nf.format(rand);
-//        System.out.println(nf.format(rand));
-        return rand;
+        if (!isAcOn) {
+            return (MIN + (MAX - MIN) * random.nextDouble());
+        } else {
+            // reduce bei 0.2 d because AC is on
+            return (MIN + (MAX - MIN) * random.nextDouble()) - 0.2d;
+        }
     }
 }

@@ -1,4 +1,4 @@
-package at.fhv.sysarch.lab3;
+package at.fhv.sysarch.lab3.blinds;
 
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
@@ -7,7 +7,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab3.actors.Actor;
 
-public class Blinds extends AbstractBehavior<Notifier.Notified> {
+public class Blinds extends AbstractBehavior<BlindsNotification> {
     public enum Actions {
         OPEN("open"), CLOSE("close");
 
@@ -20,31 +20,30 @@ public class Blinds extends AbstractBehavior<Notifier.Notified> {
     private Actor actor;
     private boolean areOpen = true;
 
-    public static Behavior<Notifier.Notified> create() {
+    public static Behavior<BlindsNotification> create() {
         return Behaviors.setup(Blinds::new);
     }
 
-    public Blinds(ActorContext<Notifier.Notified> context) {
+    public Blinds(ActorContext<BlindsNotification> context) {
         super(context);
         this.actor = Actor.BLINDS;
     }
 
     @Override
-    public Receive<Notifier.Notified> createReceive() {
-        return newReceiveBuilder().onMessage(Notifier.Notified.class, this::onNotified).build();
+    public Receive<BlindsNotification> createReceive() {
+        return newReceiveBuilder().onMessage(BlindsNotification.class, this::onNotified).build();
     }
 
-    private Behavior<Notifier.Notified> onNotified(Notifier.Notified message) {
-        if (message.whom.equals(Actions.CLOSE.action) && areOpen) {
+    private Behavior<BlindsNotification> onNotified(BlindsNotification message) {
+        if (message.action.equals(Actions.CLOSE.action) && areOpen) {
             areOpen = false;
-            getContext().getLog().info(message.whom);
+            getContext().getLog().info(message.action);
             System.out.println("Blinds are getting closed");
-            message.from.tell(new Notifier.Notify(message.whom, getContext().getSelf()));
             return this;
 
-        } else if (message.whom.equals(Actions.OPEN.action)){
+        } else if (message.action.equals(Actions.OPEN.action)){
             System.out.println("Blinds are getting opened");
-            getContext().getLog().info(message.whom);
+            getContext().getLog().info(message.action);
             areOpen = true;
             return this;
         } else {

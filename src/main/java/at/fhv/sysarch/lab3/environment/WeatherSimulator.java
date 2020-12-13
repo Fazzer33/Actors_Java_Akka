@@ -15,6 +15,7 @@ import java.util.Random;
 public class WeatherSimulator extends AbstractBehavior<WeatherNotification> {
 
     private ActorRef<INotification> forwardTo;
+    private boolean isMediaStationOn = false;
 
     public static Behavior<WeatherNotification> create(ActorRef<INotification> replyTo){
         return Behaviors.setup(context -> new WeatherSimulator(context, replyTo));
@@ -38,7 +39,7 @@ public class WeatherSimulator extends AbstractBehavior<WeatherNotification> {
         weatherNotification.setWeather(weather);
 
         getContext().getSystem().scheduler().scheduleOnce(
-                Duration.ofMillis(5000),
+                Duration.ofMillis(20000),
                 () -> getContext().getSelf().tell(weatherNotification),
                 getContext().getSystem().dispatchers().lookup(DispatcherSelector.defaultDispatcher()));
 

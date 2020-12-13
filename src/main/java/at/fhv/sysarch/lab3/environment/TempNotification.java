@@ -4,8 +4,9 @@ import at.fhv.sysarch.lab3.INotification;
 
 public class TempNotification implements INotification {
 
-    private Double temperature = 22d;
-    private boolean isACon = false;
+    private Double temperature = 0d;
+    private boolean isAcOn = false;
+    private boolean isAcNotification = false;
 
     public Double getTemperature() {
         return temperature;
@@ -15,11 +16,23 @@ public class TempNotification implements INotification {
         this.temperature = temperature;
     }
 
-    public void turnOnAc() {
-        isACon = true;
+    public boolean checkIfAcOn() {
+        return isAcOn;
     }
 
-    public void turnOffAc() {
-        isACon = false;
+    public void acIsOn() {
+        isAcOn = true;
+    }
+
+    public void acIsOff() {
+        isAcOn = false;
+    }
+
+    public boolean checkOnAcNotification() {
+        return isAcNotification;
+    }
+
+    public void setAcNotification() {
+        isAcNotification = true;
     }
 }

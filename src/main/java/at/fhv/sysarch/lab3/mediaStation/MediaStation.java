@@ -1,4 +1,4 @@
-package at.fhv.sysarch.lab3;
+package at.fhv.sysarch.lab3.mediaStation;
 
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
@@ -7,7 +7,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab3.actors.Actor;
 
-public class MediaStation extends AbstractBehavior<Notifier.Notified> {
+public class MediaStation extends AbstractBehavior<MediaStationNotification> {
    public enum Actions {
        START("start_film"), TURN_OFF("end");
 
@@ -20,31 +20,32 @@ public class MediaStation extends AbstractBehavior<Notifier.Notified> {
     private Actor actor;
     private boolean isPlaying = false;
 
-    public static Behavior<Notifier.Notified> create() {
+    public static Behavior<MediaStationNotification> create() {
         return Behaviors.setup(MediaStation::new);
     }
 
-    public MediaStation(ActorContext<Notifier.Notified> context) {
+    public MediaStation(ActorContext<MediaStationNotification> context) {
         super(context);
         this.actor = Actor.MEDIA_STATION;
     }
 
     @Override
-    public Receive<Notifier.Notified> createReceive() {
-        return newReceiveBuilder().onMessage(Notifier.Notified.class, this::onNotified).build();
+    public Receive<MediaStationNotification> createReceive() {
+        return newReceiveBuilder().onMessage(MediaStationNotification.class, this::onNotified).build();
     }
 
-    private Behavior<Notifier.Notified> onNotified(Notifier.Notified message) {
-        if (message.whom.equals(Actions.TURN_OFF.action) && isPlaying) {
+    private Behavior<MediaStationNotification> onNotified(MediaStationNotification notification) {
+        System.out.println("test");
+        System.out.println(notification.action);
+        if (notification.action.equals(Actions.TURN_OFF.action) && isPlaying) {
             isPlaying = false;
             System.out.println("MediaStation turning off...");
-            getContext().getLog().info(message.whom);
+            getContext().getLog().info(notification.action);
             return this;
-        } else if (message.whom.equals(Actions.START.action) && !isPlaying) {
+        } else if (notification.action.equals(Actions.START.action) && !isPlaying) {
             isPlaying = true;
             System.out.println("MediaStation is starting...");
-            getContext().getLog().info(message.whom);
-            message.from.tell(new Notifier.Notify(message.whom, getContext().getSelf()));
+            getContext().getLog().info(notification.action);
             return this;
         } else {
             return this;
