@@ -14,7 +14,7 @@ public class Main {
     public static void main(String[] args) {
         boolean running = true;
         //#actor-system
-        final ActorSystem<BlackboardMain.SendNotification> notificationMain = ActorSystem.create(BlackboardMain.create(), "automationSystem");
+        final ActorSystem<INotification> notificationMain = ActorSystem.create(BlackboardMain.create(), "automationSystem");
         //#actor-system
         Scanner sc = new Scanner(new InputStreamReader(System.in));
 
@@ -78,16 +78,6 @@ public class Main {
                     System.out.println("Not a valid option!");
                     break;
             }
-
-
-                double MIN = -5;
-            double MAX = 5;
-            Random random = new Random();
-            double rand = (MIN + (MAX - MIN) * random.nextDouble());
-            NumberFormat nf = NumberFormat.getInstance();
-            nf.setMaximumFractionDigits(2);
-            nf.format(rand);
-            System.out.println(nf.format(rand));
 
 
         }
