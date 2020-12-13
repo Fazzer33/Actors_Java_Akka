@@ -7,7 +7,6 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import at.fhv.sysarch.lab3.Notifier;
 import at.fhv.sysarch.lab3.actors.Actor;
 
 import java.time.Duration;

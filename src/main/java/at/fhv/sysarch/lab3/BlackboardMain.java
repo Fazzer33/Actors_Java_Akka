@@ -60,17 +60,23 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
     }
 
     private Behavior<INotification> onSendNotification(SendNotification command) {
-        //#create-actors
         // MEDIA_STATION
         if (command.actor == Actor.MEDIA_STATION) {
             notifier.tell(new Notifier.Notify(command.notification, actorRefMap.get(Actor.MEDIA_STATION)));
         }
 
-        //BLINDS
+        // BLINDS
         if (command.actor == Actor.BLINDS) {
             notifier.tell(new Notifier.Notify(command.notification, actorRefMap.get(Actor.BLINDS)));
         }
-        //#create-actors
+
+        // AC
+        if (command.actor == Actor.AC) {
+            TempNotification tempNotification = new TempNotification();
+            tempNotification.turnOnAc();
+            actorRefMap.get(Actor.TEMPERATURE_SIMULATOR).tell(tempNotification);
+        }
+
         return this;
     }
 
