@@ -17,7 +17,7 @@ public class TemperatureSimulator extends AbstractBehavior<TempNotification> {
     private ActorRef<TempNotification> forwardTo;
     private Actor actor;
     private boolean isAcOn = false;
-    private double currentTemp = 22;
+    private double currentTemp = 22d;
 
 
     public static Behavior<TempNotification> create(ActorRef<TempNotification> forwardTo) {
@@ -47,12 +47,10 @@ public class TemperatureSimulator extends AbstractBehavior<TempNotification> {
             currentTemp = currentTemp + calcRandomTemp();
             tempNotification.setTemperature(currentTemp);
             getContext().getSystem().scheduler().scheduleOnce(
-                    Duration.ofMillis(20000),
+                    Duration.ofMillis(7000),
                     () -> getContext().getSelf().tell(tempNotification),
                     getContext().getSystem().dispatchers().lookup(DispatcherSelector.defaultDispatcher()));
             forwardTo.tell(temp);
-
-            System.out.println(currentTemp);
         }
         return Behaviors.same();
     }

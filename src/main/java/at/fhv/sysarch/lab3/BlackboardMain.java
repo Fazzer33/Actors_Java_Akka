@@ -73,10 +73,13 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
     private Behavior<INotification> onTempNotification(TempNotification command) {
         actorStates.setCurrentTemperature(command.getTemperature());
 
+        System.out.println(command.getTemperature());
+
         if (command.getTemperature() >= 20) {
             TempNotification tempNotification = new TempNotification();
             tempNotification.acIsOn();
             tempNotification.setAcNotification();
+            tempNotification.setTemperature(command.getTemperature());
             actorRefMap.get(Actor.TEMPERATURE_SIMULATOR).tell(tempNotification);
             actorRefMap.get(Actor.AC).tell(new ACNotification(AC.Actions.AC_ON.action));
 
@@ -85,6 +88,7 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
             TempNotification tempNotification = new TempNotification();
             tempNotification.acIsOff();
             tempNotification.setAcNotification();
+            tempNotification.setTemperature(command.getTemperature());
             actorRefMap.get(Actor.TEMPERATURE_SIMULATOR).tell(tempNotification);
             actorRefMap.get(Actor.AC).tell(new ACNotification(AC.Actions.AC_OFF.action));
         }
@@ -95,10 +99,10 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
     private Behavior<INotification> onWeatherNotification(WeatherNotification command) {
         actorStates.setWeather(command.getWeather());
 
-        if (command.getWeather() == Weather.SUNNY) {
+        if (command.getWeather() == Weather.SUNNY && !actorStates.isMediaStationOn()) {
             actorRefMap.get(Actor.BLINDS).tell(new BlindsNotification(Blinds.Actions.CLOSE.action));
         }
-        if (command.getWeather() == Weather.CLOUDY) {
+        if (command.getWeather() == Weather.CLOUDY && !actorStates.isMediaStationOn()) {
             actorRefMap.get(Actor.BLINDS).tell(new BlindsNotification(Blinds.Actions.OPEN.action));
         }
 
@@ -107,32 +111,32 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
 
     private Behavior<INotification> onBlindsNotification(BlindsNotification command) {
 
+        System.out.println(command.action);
         BlindsNotification blindsNotification = new BlindsNotification(command.action);
 
         if (actorStates.isMediaStationOn()) {
             blindsNotification.setMediaStationOn();
             blindsNotification.setMSNotification();
-            actorRefMap.get(Actor.WEATHER_SIMULATOR).tell(blindsNotification);
+            actorRefMap.get(Actor.BLINDS).tell(blindsNotification);
         }
-        blindsNotification.setMediaStationOff();
-        blindsNotification.setMSNotification();
-        actorRefMap.get(Actor.WEATHER_SIMULATOR).tell(blindsNotification);
 
-
-        actorRefMap.get(Actor.BLINDS).tell(new BlindsNotification(command.action));
-
+        actorRefMap.get(Actor.BLINDS).tell(blindsNotification);
 
         if (command.action.equals(Blinds.Actions.OPEN.action)) {
             actorStates.setAreBlindsClosed(false);
         } else {
-            actorStates.setAreBlindsClosed(false);
+            actorStates.setAreBlindsClosed(true);
         }
 
         return this;
     }
 
     private Behavior<INotification> onMediaStationNotification(MediaStationNotification command) {
-
+        if (command.action.equals(MediaStation.Actions.START.action)) {
+            actorStates.setMediaStationOn(true);
+        } else {
+            actorStates.setMediaStationOn(false);
+        }
         actorRefMap.get(Actor.MEDIA_STATION).tell(new MediaStationNotification(command.action));
 
         return this;

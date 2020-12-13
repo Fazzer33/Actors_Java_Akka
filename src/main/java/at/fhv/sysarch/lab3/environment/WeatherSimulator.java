@@ -15,7 +15,6 @@ import java.util.Random;
 public class WeatherSimulator extends AbstractBehavior<WeatherNotification> {
 
     private ActorRef<INotification> forwardTo;
-    private boolean isMediaStationOn = false;
 
     public static Behavior<WeatherNotification> create(ActorRef<INotification> replyTo){
         return Behaviors.setup(context -> new WeatherSimulator(context, replyTo));

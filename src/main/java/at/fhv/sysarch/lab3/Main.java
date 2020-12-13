@@ -1,7 +1,6 @@
 package at.fhv.sysarch.lab3;
 
 import akka.actor.typed.ActorSystem;
-import at.fhv.sysarch.lab3.actors.Actor;
 import at.fhv.sysarch.lab3.blinds.Blinds;
 import at.fhv.sysarch.lab3.blinds.BlindsNotification;
 import at.fhv.sysarch.lab3.mediaStation.MediaStation;

@@ -4,8 +4,8 @@ import at.fhv.sysarch.lab3.INotification;
 
 public class TempNotification implements INotification {
 
-    private Double temperature = 0d;
-    private boolean isAcOn = false;
+    private Double temperature = 22d;
+    private boolean isAcOn = true;
     private boolean isAcNotification = false;
 
     public Double getTemperature() {

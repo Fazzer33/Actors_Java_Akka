@@ -19,6 +19,7 @@ public class Blinds extends AbstractBehavior<BlindsNotification> {
 
     private Actor actor;
     private boolean areOpen = true;
+    private boolean isMediaStationOn = false;
 
     public static Behavior<BlindsNotification> create() {
         return Behaviors.setup(Blinds::new);
@@ -35,13 +36,17 @@ public class Blinds extends AbstractBehavior<BlindsNotification> {
     }
 
     private Behavior<BlindsNotification> onNotified(BlindsNotification message) {
+        System.out.println("MediaStation on?: "+message.checkIfMediaStationOn());
+        if (message.checkOnMSNotification()) {
+            isMediaStationOn = message.checkIfMediaStationOn();
+        }
         if (message.action.equals(Actions.CLOSE.action) && areOpen) {
             areOpen = false;
             getContext().getLog().info(message.action);
             System.out.println("Blinds are getting closed");
             return this;
 
-        } else if (message.action.equals(Actions.OPEN.action)){
+        } else if (message.action.equals(Actions.OPEN.action) && !isMediaStationOn && !areOpen){
             System.out.println("Blinds are getting opened");
             getContext().getLog().info(message.action);
             areOpen = true;
