@@ -6,8 +6,10 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import at.fhv.sysarch.lab3.INotification;
 import at.fhv.sysarch.lab3.actors.Actor;
+
+// In this case the fridge should relay this request to a separate OrderProcessor actor (see Per session child Actor).
+// https://doc.akka.io/docs/akka/current/typed/interaction-patterns.html
 
 public class Fridge extends AbstractBehavior<FridgeNotification> {
     public enum Actions {

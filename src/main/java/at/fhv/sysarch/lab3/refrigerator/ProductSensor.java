@@ -9,7 +9,8 @@ import akka.actor.typed.javadsl.Receive;
 
 import java.util.List;
 
-
+// Request-Response with ask between two actors
+// The user orders products.
 // https://doc.akka.io/docs/akka/current/typed/interaction-patterns.html
 
 public class ProductSensor extends AbstractBehavior<ProductSensor.Command> {
