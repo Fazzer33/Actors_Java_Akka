@@ -12,8 +12,8 @@ public class TemperatureSensor extends AbstractBehavior<INotification> {
 
     private ActorRef<INotification> forwardTo;
 
-    public static Behavior<INotification> create(ActorRef<INotification> replyTo){
-        return Behaviors.setup(context -> new TemperatureSensor(context, replyTo));
+    public static Behavior<INotification> create(ActorRef<INotification> forwardTo){
+        return Behaviors.setup(context -> new TemperatureSensor(context, forwardTo));
     }
 
     public TemperatureSensor(ActorContext<INotification> context, ActorRef<INotification> forwardTo) {

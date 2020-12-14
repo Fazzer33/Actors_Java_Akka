@@ -14,6 +14,7 @@ import at.fhv.sysarch.lab3.blinds.BlindsNotification;
 import at.fhv.sysarch.lab3.environment.*;
 import at.fhv.sysarch.lab3.mediaStation.MediaStation;
 import at.fhv.sysarch.lab3.mediaStation.MediaStationNotification;
+import at.fhv.sysarch.lab3.refrigerator.Fridge;
 
 import java.util.HashMap;
 
@@ -51,6 +52,7 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
         actorRefMap.put(Actor.BLINDS, getContext().spawn(Blinds.create(), "blinds"));
         actorRefMap.put(Actor.AC, getContext().spawn(AC.create(), "ac"));
 
+        actorRefMap.put(Actor.FRIDGE, getContext().spawn(Fridge.create(), "fridge"));
         //#create-actors
     }
 
