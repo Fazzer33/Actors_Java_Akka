@@ -5,6 +5,8 @@ import at.fhv.sysarch.lab3.blinds.Blinds;
 import at.fhv.sysarch.lab3.blinds.BlindsNotification;
 import at.fhv.sysarch.lab3.mediaStation.MediaStation;
 import at.fhv.sysarch.lab3.mediaStation.MediaStationNotification;
+import at.fhv.sysarch.lab3.refrigerator.Fridge;
+import at.fhv.sysarch.lab3.refrigerator.FridgeNotification;
 
 import java.io.InputStreamReader;
 import java.util.Scanner;
@@ -35,7 +37,7 @@ public class Main {
 
             System.out.println(line);
 
-            switch(line) {
+            switch (line) {
                 case 1:
                     System.out.println("MediaStation selected...:");
                     System.out.println("What do you want?");
@@ -44,24 +46,19 @@ public class Main {
 
                     line = sc.nextInt();
 
-                    switch(line) {
+                    switch (line) {
                         case 1:
-                            //#main-send-messages
                             // inform MediaStation
                             notificationMain.tell(new MediaStationNotification(MediaStation.Actions.START.action));
 
                             // inform Blinds
                             notificationMain.tell(new BlindsNotification(Blinds.Actions.CLOSE.action));
-
-                            //#main-send-messages
                             break;
                         case 2:
-                            //#main-send-messages
                             notificationMain.tell(new MediaStationNotification(MediaStation.Actions.TURN_OFF.action));
 
                             // inform Blinds
                             notificationMain.tell(new BlindsNotification(Blinds.Actions.OPEN.action));
-                            //#main-send-messages
                             break;
                     }
 
@@ -69,6 +66,57 @@ public class Main {
                 case 2:
                     System.out.println("Blinds");
                     break;
+                case 3:
+                    System.out.println("Fridge selected...:");
+                    System.out.println("What do you want?");
+                    System.out.println("1 - Order:");
+                    System.out.println("2 - Consume:");
+
+                    line = sc.nextInt();
+
+
+                    switch (line) {
+                        // Order
+                        case 1:
+                            boolean orderComplete = false;
+
+                            while (!orderComplete) {
+                                System.out.println("What do you want to order?");
+                                System.out.println("1 - Apples");
+                                System.out.println("2 - Milk");
+                                System.out.println("3 - Complete Order");
+                                System.out.println("4 - Abort Order");
+
+
+                                line = sc.nextInt();
+
+                                switch (line) {
+                                    case 1:
+                                        System.out.println("How much Apples do you want?");
+                                        int apples = sc.nextInt();
+                                        notificationMain.tell(new FridgeNotification(Fridge.Actions.ORDER.action));
+                                        break;
+                                    case 2:
+                                        System.out.println("How much Milk do you want?");
+                                        int milk = sc.nextInt();
+                                        notificationMain.tell(new FridgeNotification(Fridge.Actions.ORDER.action));
+                                        break;
+                                    case 3:
+                                        orderComplete = true;
+                                        System.out.println("Order completed");
+                                        break;
+                                }
+                            }
+                            break;
+
+                        // Consume
+                        case 2:
+
+                            notificationMain.tell(new FridgeNotification(Fridge.Actions.CONSUME.action));
+                            break;
+                    }
+                    break;
+
                 case 5:
                     System.out.println("Program ending...");
                     running = false;
@@ -77,8 +125,6 @@ public class Main {
                     System.out.println("Not a valid option!");
                     break;
             }
-
-
         }
     }
 }

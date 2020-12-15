@@ -15,6 +15,7 @@ import at.fhv.sysarch.lab3.environment.*;
 import at.fhv.sysarch.lab3.mediaStation.MediaStation;
 import at.fhv.sysarch.lab3.mediaStation.MediaStationNotification;
 import at.fhv.sysarch.lab3.refrigerator.Fridge;
+import at.fhv.sysarch.lab3.refrigerator.FridgeNotification;
 
 import java.util.HashMap;
 
@@ -58,18 +59,13 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
 
     @Override
     public Receive<INotification> createReceive() {
-        return newReceiveBuilder().onMessage(SendNotification.class, this::onSendNotification).
+        return newReceiveBuilder().
                 onMessage(TempNotification.class, this::onTempNotification).
                 onMessage(WeatherNotification.class, this::onWeatherNotification).
                 onMessage(BlindsNotification.class, this::onBlindsNotification).
                 onMessage(MediaStationNotification.class, this::onMediaStationNotification).
-                onMessage(ACNotification.class, this::onACNotification).build();
-    }
-
-    private Behavior<INotification> onSendNotification(SendNotification command) {
-
-
-        return this;
+                onMessage(ACNotification.class, this::onACNotification).
+                onMessage(FridgeNotification.class, this::onFridgeNotification).build();
     }
 
     private Behavior<INotification> onTempNotification(TempNotification command) {
@@ -146,6 +142,12 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
 
     private Behavior<INotification> onACNotification(ACNotification notification) {
         // should the user be able to turn ac on/off ? or just automatic
+        return this;
+    }
+
+    private Behavior<INotification> onFridgeNotification(FridgeNotification notification) {
+
+        actorRefMap.get(Actor.FRIDGE).tell(new FridgeNotification(notification.action));
         return this;
     }
 }

@@ -8,12 +8,14 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab3.actors.Actor;
 
+import java.util.List;
+
 // In this case the fridge should relay this request to a separate OrderProcessor actor (see Per session child Actor).
 // https://doc.akka.io/docs/akka/current/typed/interaction-patterns.html
 
 public class Fridge extends AbstractBehavior<FridgeNotification> {
     public enum Actions {
-        START("start_film"), TURN_OFF("end");
+        CONSUME("consume"), SHOW_PRODUCTS("showProducts"), ORDER_HISTORY("orderHistory"), ORDER("order");
 
         public final String action;
         Actions(String action) {
@@ -30,6 +32,7 @@ public class Fridge extends AbstractBehavior<FridgeNotification> {
     private final double MAX_WEIGHT = 80;
     private double currentWeight;
     private int currentProducts;
+    private List<Product> productList;
 
     public static Behavior<FridgeNotification> create() {
         return Behaviors.setup(Fridge::new);
@@ -39,7 +42,7 @@ public class Fridge extends AbstractBehavior<FridgeNotification> {
         super(context);
         this.actor = Actor.FRIDGE;
         productSensor = getContext().spawn(ProductSensor.create(), "productSensor");
-        spaceSensor = getContext().spawn(SpaceSensor.create(), "productSensor");
+        spaceSensor = getContext().spawn(SpaceSensor.create(), "spaceSensor");
 
     }
 
@@ -49,6 +52,13 @@ public class Fridge extends AbstractBehavior<FridgeNotification> {
     }
 
     private Behavior<FridgeNotification> onNotified(FridgeNotification notification) {
+
+        if (notification.action.equals(Actions.ORDER.action)) {
+            System.out.println("order");
+        } else if(notification.action.equals(Actions.CONSUME.action)) {
+            System.out.println("consume");
+        }
+
         return this;
     }
 }
