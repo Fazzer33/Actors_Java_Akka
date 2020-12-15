@@ -1,14 +1,15 @@
 package at.fhv.sysarch.lab3;
 
 import akka.actor.typed.ActorSystem;
+import akka.japi.Pair;
 import at.fhv.sysarch.lab3.blinds.Blinds;
 import at.fhv.sysarch.lab3.blinds.BlindsNotification;
 import at.fhv.sysarch.lab3.mediaStation.MediaStation;
 import at.fhv.sysarch.lab3.mediaStation.MediaStationNotification;
-import at.fhv.sysarch.lab3.refrigerator.Fridge;
-import at.fhv.sysarch.lab3.refrigerator.FridgeNotification;
+import at.fhv.sysarch.lab3.refrigerator.*;
 
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.Scanner;
 
 
@@ -79,6 +80,8 @@ public class Main {
                         // Order
                         case 1:
                             boolean orderComplete = false;
+                            HashMap<ProductType, Integer> orders = new HashMap<>();
+                            int amount = 0;
 
                             while (!orderComplete) {
                                 System.out.println("What do you want to order?");
@@ -92,18 +95,19 @@ public class Main {
 
                                 switch (line) {
                                     case 1:
-                                        System.out.println("How much Apples do you want?");
-                                        int apples = sc.nextInt();
-                                        notificationMain.tell(new FridgeNotification(Fridge.Actions.ORDER.action));
+                                        System.out.println("How many Apples do you want?");
+                                        amount = sc.nextInt();
+                                        orders.put(ProductType.APPLE, amount);
                                         break;
                                     case 2:
-                                        System.out.println("How much Milk do you want?");
-                                        int milk = sc.nextInt();
-                                        notificationMain.tell(new FridgeNotification(Fridge.Actions.ORDER.action));
+                                        System.out.println("How many Milk-Packages do you want?");
+                                        amount = sc.nextInt();
+                                        orders.put(ProductType.MILK, amount);
                                         break;
                                     case 3:
                                         orderComplete = true;
                                         System.out.println("Order completed");
+                                        notificationMain.tell(new OrderNotification(orders));
                                         break;
                                 }
                             }
@@ -111,8 +115,27 @@ public class Main {
 
                         // Consume
                         case 2:
+                            int consumeAmount = 0;
 
-                            notificationMain.tell(new FridgeNotification(Fridge.Actions.CONSUME.action));
+                            System.out.println("What do you want from the fridge:");
+                            System.out.println("1 - Apple");
+                            System.out.println("2 - Milk");
+
+                            line = sc.nextInt();
+
+                            switch (line) {
+                                case 1:
+                                    System.out.println("How many Apples?");
+                                    consumeAmount = sc.nextInt();
+                                    notificationMain.tell( new ConsumeNotification(new Pair<>(ProductType.APPLE, consumeAmount)));
+                                    break;
+
+                                case 2:
+                                    System.out.println("How many Milk-Packages?");
+                                    consumeAmount = sc.nextInt();
+                                    notificationMain.tell( new ConsumeNotification(new Pair<>(ProductType.APPLE, consumeAmount)));
+                                    break;
+                            }
                             break;
                     }
                     break;

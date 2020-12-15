@@ -11,6 +11,20 @@ public class Product {
         this.price = price;
     }
 
+    public Product(ProductType type) {
+        this.type = type;
+
+        if (this.type == ProductType.APPLE) {
+            this.weight = 0.3;
+            this.price = 0.30;
+        }
+
+        if (this.type == ProductType.MILK) {
+            this.weight = 1;
+            this.price = 0.80;
+        }
+    }
+
     public ProductType getType() {
         return type;
     }

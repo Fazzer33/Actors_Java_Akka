@@ -6,59 +6,96 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import akka.japi.Pair;
+import at.fhv.sysarch.lab3.INotification;
 import at.fhv.sysarch.lab3.actors.Actor;
-
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 // In this case the fridge should relay this request to a separate OrderProcessor actor (see Per session child Actor).
 // https://doc.akka.io/docs/akka/current/typed/interaction-patterns.html
 
-public class Fridge extends AbstractBehavior<FridgeNotification> {
-    public enum Actions {
-        CONSUME("consume"), SHOW_PRODUCTS("showProducts"), ORDER_HISTORY("orderHistory"), ORDER("order");
-
-        public final String action;
-        Actions(String action) {
-            this.action = action;
-        }
-    }
-
+public class Fridge extends AbstractBehavior<INotification> {
     private ActorRef<ProductSensor.Command> productSensor;
     private ActorRef<FridgeNotification> spaceSensor;
 
     private Actor actor;
     private boolean isEmpty = false;
-    private final int MAX_PRODUCTS = 50;
-    private final double MAX_WEIGHT = 80;
-    private double currentWeight;
-    private int currentProducts;
-    private List<Product> productList;
+    private final int MAX_PRODUCTS = 30;
+    private final double MAX_WEIGHT = 60;
+    private double currentWeight = 0;
+    private int currentProducts = 0;
+    private HashMap<ProductType, Pair<Product,Integer>> productsInFridge = new HashMap<>();
+    private List<HashMap<ProductType, Pair<Product,Integer>>> previousOrders = new LinkedList<>();
 
-    public static Behavior<FridgeNotification> create() {
+    public static Behavior<INotification> create() {
         return Behaviors.setup(Fridge::new);
     }
 
-    public Fridge(ActorContext<FridgeNotification> context) {
+    public Fridge(ActorContext<INotification> context) {
         super(context);
         this.actor = Actor.FRIDGE;
         productSensor = getContext().spawn(ProductSensor.create(), "productSensor");
         spaceSensor = getContext().spawn(SpaceSensor.create(), "spaceSensor");
-
     }
 
     @Override
-    public Receive<FridgeNotification> createReceive() {
-        return newReceiveBuilder().onMessage(FridgeNotification.class, this::onNotified).build();
+    public Receive<INotification> createReceive() {
+        return newReceiveBuilder().
+                onMessage(FridgeNotification.class, this::onNotified).
+                onMessage(ConsumeNotification.class, this::onConsume).build();
     }
 
-    private Behavior<FridgeNotification> onNotified(FridgeNotification notification) {
-
-        if (notification.action.equals(Actions.ORDER.action)) {
-            System.out.println("order");
-        } else if(notification.action.equals(Actions.CONSUME.action)) {
-            System.out.println("consume");
+    private Behavior<INotification> onNotified(FridgeNotification notification) {
+        int size = 0;
+        for (Pair i : notification.productMap.values()) {
+            size += (int) i.second();
         }
 
+        System.out.println(size);
+
+        if (size <= (MAX_PRODUCTS - currentProducts)
+                && notification.orderWeight <= (MAX_WEIGHT - currentWeight)) {
+            System.out.println("passt super in den Kühli");
+            productsInFridge = notification.productMap;
+            previousOrders.add(notification.productMap);
+
+        } else {
+            System.out.println("Too much weight or too less space in the fridge");
+            System.out.println("Available Weight: " + (MAX_WEIGHT - currentWeight));
+            System.out.println("Available Space: " + (MAX_PRODUCTS - currentProducts));
+            System.out.println();
+            System.out.println("Order: Weight: " + notification.orderWeight);
+            System.out.println("Space: " + size);
+        }
+        return this;
+    }
+
+    private Behavior<INotification> onConsume(ConsumeNotification notification) {
+        ProductType type = notification.product.first();
+        if (productsInFridge.get(type) != null) {
+            int amount = productsInFridge.get(type).second();
+            int consumeAmount = notification.product.second();
+
+            System.out.println(amount);
+
+            if (productsInFridge.get(notification.product.first()) == null || amount < consumeAmount) {
+                System.out.println("Too less "+type.name());
+                System.out.println("Amount in fridge: "+amount);
+            } else {
+                amount = amount - consumeAmount;
+                if (amount == 0) {
+                    // remove if product from map if empty
+                    productsInFridge.remove(type);
+                } else {
+                    // new entry in map with updated amount
+                    productsInFridge.put(type, new Pair<>(new Product(type), amount));
+                }
+            }
+        } else {
+            System.out.println("Product is not in the fridge");
+        }
         return this;
     }
 }

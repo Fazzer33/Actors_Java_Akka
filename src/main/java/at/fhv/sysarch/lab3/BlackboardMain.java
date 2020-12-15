@@ -14,8 +14,7 @@ import at.fhv.sysarch.lab3.blinds.BlindsNotification;
 import at.fhv.sysarch.lab3.environment.*;
 import at.fhv.sysarch.lab3.mediaStation.MediaStation;
 import at.fhv.sysarch.lab3.mediaStation.MediaStationNotification;
-import at.fhv.sysarch.lab3.refrigerator.Fridge;
-import at.fhv.sysarch.lab3.refrigerator.FridgeNotification;
+import at.fhv.sysarch.lab3.refrigerator.*;
 
 import java.util.HashMap;
 
@@ -24,16 +23,7 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
     // save actor refs
     public HashMap<Actor, ActorRef> actorRefMap = new HashMap<>();
     public ActorStates actorStates = new ActorStates();
-
-    public static class SendNotification implements INotification {
-        public final Actor actor;
-        public final String notification;
-
-        public SendNotification(Actor actor, String notification) {
-            this.actor = actor;
-            this.notification = notification;
-        }
-    }
+    private int orderCounter = 1;
 
     public static Behavior<INotification> create() {
         return Behaviors.setup(BlackboardMain::new);
@@ -65,7 +55,8 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
                 onMessage(BlindsNotification.class, this::onBlindsNotification).
                 onMessage(MediaStationNotification.class, this::onMediaStationNotification).
                 onMessage(ACNotification.class, this::onACNotification).
-                onMessage(FridgeNotification.class, this::onFridgeNotification).build();
+                onMessage(OrderNotification.class, this::onOrderNotification).
+                onMessage(ConsumeNotification.class, this::onConsumeNotification).build();
     }
 
     private Behavior<INotification> onTempNotification(TempNotification command) {
@@ -145,9 +136,14 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
         return this;
     }
 
-    private Behavior<INotification> onFridgeNotification(FridgeNotification notification) {
+    private Behavior<INotification> onOrderNotification(OrderNotification notification) {
+        getContext().spawn(OrderProcessor.create(actorRefMap.get(Actor.FRIDGE)), "order"+orderCounter).tell(new OrderNotification(notification.orderMap));
+        orderCounter++;
+        return this;
+    }
 
-        actorRefMap.get(Actor.FRIDGE).tell(new FridgeNotification(notification.action));
+    private Behavior<INotification> onConsumeNotification(ConsumeNotification notification) {
+        actorRefMap.get(Actor.FRIDGE).tell(new ConsumeNotification(notification.product));
         return this;
     }
 }
