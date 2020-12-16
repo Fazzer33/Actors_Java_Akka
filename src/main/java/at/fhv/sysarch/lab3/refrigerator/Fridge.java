@@ -26,6 +26,8 @@ public class Fridge extends AbstractBehavior<INotification> {
     private final double MAX_WEIGHT = 60;
     private double currentWeight = 0;
     private int currentProducts = 0;
+    private int orderCounter = 0;
+    private List<ProductType> essentialProducts = new LinkedList<>();
     private HashMap<ProductType, Pair<Product,Integer>> productsInFridge = new HashMap<>();
     private List<HashMap<ProductType, Pair<Product,Integer>>> previousOrders = new LinkedList<>();
 
@@ -35,7 +37,9 @@ public class Fridge extends AbstractBehavior<INotification> {
 
     public Fridge(ActorContext<INotification> context) {
         super(context);
-        this.actor = Actor.FRIDGE;
+        actor = Actor.FRIDGE;
+        essentialProducts.add(ProductType.APPLE);
+        essentialProducts.add(ProductType.MILK);
         productSensor = getContext().spawn(ProductSensor.create(), "productSensor");
         spaceSensor = getContext().spawn(SpaceSensor.create(), "spaceSensor");
     }
@@ -88,6 +92,9 @@ public class Fridge extends AbstractBehavior<INotification> {
                 if (amount == 0) {
                     // remove if product from map if empty
                     productsInFridge.remove(type);
+                    if (essentialProducts.contains(type)) {
+                       reorderEmptyProduct(type);
+                    }
                 } else {
                     // new entry in map with updated amount
                     productsInFridge.put(type, new Pair<>(new Product(type), amount));
@@ -97,5 +104,13 @@ public class Fridge extends AbstractBehavior<INotification> {
             System.out.println("Product is not in the fridge");
         }
         return this;
+    }
+
+    private void reorderEmptyProduct(ProductType type) {
+        System.out.println("Reorder 5 * "+type +" because nothing left in fridge");
+        HashMap<ProductType, Integer> orderMap = new HashMap();
+        orderMap.put(type, 5);
+        getContext().spawn(OrderProcessor.create(getContext().getSelf()), "re-order"+orderCounter).tell(new OrderNotification(orderMap));
+        orderCounter++;
     }
 }

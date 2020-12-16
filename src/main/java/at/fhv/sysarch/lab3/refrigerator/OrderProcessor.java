@@ -7,15 +7,16 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.japi.Pair;
+import at.fhv.sysarch.lab3.INotification;
 
 import java.util.HashMap;
 
 public class OrderProcessor extends AbstractBehavior<OrderNotification> {
-    private ActorRef<FridgeNotification> forwardTo;
+    private ActorRef<INotification> forwardTo;
     private HashMap<ProductType, Pair<Product, Integer>> productMap = new HashMap<>();
     private double orderWeight = 0;
 
-    public OrderProcessor(ActorContext<OrderNotification> context, ActorRef<FridgeNotification> forwardTo) {
+    public OrderProcessor(ActorContext<OrderNotification> context, ActorRef<INotification> forwardTo) {
         super(context);
         this.forwardTo = forwardTo;
     }
@@ -25,7 +26,7 @@ public class OrderProcessor extends AbstractBehavior<OrderNotification> {
         return newReceiveBuilder().onMessage(OrderNotification.class, this::onNotified).build();
     }
 
-    public static Behavior<OrderNotification> create(ActorRef<FridgeNotification> forwardTo) {
+    public static Behavior<OrderNotification> create(ActorRef<INotification> forwardTo) {
         return Behaviors.setup(context -> new OrderProcessor(context, forwardTo));
     }
 
