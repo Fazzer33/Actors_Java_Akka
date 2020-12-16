@@ -66,6 +66,7 @@ public class Main {
                     System.out.println("What do you want?");
                     System.out.println("1 - Order:");
                     System.out.println("2 - Consume:");
+                    System.out.println("3 - Fridge Status:");
 
                     line = sc.nextInt();
 
@@ -131,6 +132,23 @@ public class Main {
                                     break;
                             }
                             break;
+
+                        // Fridge Status
+                        case 3:
+
+                            System.out.println("Choose action:");
+                            System.out.println("1 - Show Current Products in Fridge");
+                            System.out.println("2 - Show Order History");
+                            line = sc.nextInt();
+
+                            switch (line) {
+                                case 1:
+                                    notificationMain.tell(new FridgeStatusNotification(FridgeStatusNotification.Actions.CURRENT_PRODUCTS.action));
+                                    break;
+                                case 2:
+                                    notificationMain.tell(new FridgeStatusNotification(FridgeStatusNotification.Actions.ORDER_HISTORY.action));
+                                    break;
+                            }
                     }
                     break;
 

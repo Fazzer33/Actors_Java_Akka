@@ -55,7 +55,8 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
                 onMessage(MediaStationNotification.class, this::onMediaStationNotification).
                 onMessage(ACNotification.class, this::onACNotification).
                 onMessage(OrderNotification.class, this::onOrderNotification).
-                onMessage(ConsumeNotification.class, this::onConsumeNotification).build();
+                onMessage(ConsumeNotification.class, this::onConsumeNotification).
+                onMessage(FridgeStatusNotification.class, this::onFridgeStatusNotification).build();
     }
 
     private Behavior<INotification> onTempNotification(TempNotification command) {
@@ -147,6 +148,11 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
 
     private Behavior<INotification> onConsumeNotification(ConsumeNotification notification) {
         actorRefMap.get(Actor.FRIDGE).tell(new ConsumeNotification(notification.product));
+        return this;
+    }
+
+    private Behavior<INotification> onFridgeStatusNotification(FridgeStatusNotification notification) {
+        actorRefMap.get(Actor.FRIDGE).tell(new FridgeStatusNotification(notification.action));
         return this;
     }
 }

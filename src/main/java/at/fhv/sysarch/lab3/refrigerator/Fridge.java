@@ -29,7 +29,7 @@ public class Fridge extends AbstractBehavior<INotification> {
     private int orderCounter = 0;
     private List<ProductType> essentialProducts = new LinkedList<>();
     private HashMap<ProductType, Pair<Product,Integer>> productsInFridge = new HashMap<>();
-    private List<HashMap<ProductType, Pair<Product,Integer>>> previousOrders = new LinkedList<>();
+    private List<Receipt> previousOrders = new LinkedList<>();
 
     public static Behavior<INotification> create() {
         return Behaviors.setup(Fridge::new);
@@ -55,7 +55,8 @@ public class Fridge extends AbstractBehavior<INotification> {
     public Receive<INotification> createReceive() {
         return newReceiveBuilder().
                 onMessage(FridgeNotification.class, this::onNotified).
-                onMessage(ConsumeNotification.class, this::onConsume).build();
+                onMessage(ConsumeNotification.class, this::onConsume).
+                onMessage(FridgeStatusNotification.class, this::onStatusNotification).build();
     }
 
     private Behavior<INotification> onNotified(FridgeNotification notification) {
@@ -70,7 +71,10 @@ public class Fridge extends AbstractBehavior<INotification> {
                 && notification.orderWeight <= (MAX_WEIGHT - currentWeight)) {
             System.out.println("Order gets placed into the fridge");
             productsInFridge = notification.productMap;
-            previousOrders.add(notification.productMap);
+
+            Receipt receipt = createReceipt(notification.productMap);
+            receipt.printAllPrizes();
+            previousOrders.add(receipt);
 
         } else {
             System.out.println("Too much weight or too less space in the fridge");
@@ -111,15 +115,47 @@ public class Fridge extends AbstractBehavior<INotification> {
         return this;
     }
 
+    private Behavior<INotification> onStatusNotification(FridgeStatusNotification notification) {
+        if (notification.action.equals(FridgeStatusNotification.Actions.CURRENT_PRODUCTS.action)) {
+            System.out.println("Products in fridge:");
+            for (ProductType type : productsInFridge.keySet()) {
+                String key = type.toString();
+                int value = productsInFridge.get(type).second();
+                System.out.println("Product: "+key +" - Amount: "+value);
+            }
+        }
+        else if (notification.action.equals(FridgeStatusNotification.Actions.ORDER_HISTORY.action)) {
+            System.out.println("Order History: ");
+            int i = 1;
+            for (Receipt receipt : previousOrders) {
+                System.out.println("Order "+i +":");
+                receipt.printAllPrizes();
+                i++;
+                System.out.println();
+            }
+        }
+        return this;
+    }
+
     /**
      * Reorders an Product if nothing is left in the fridge
      * @param type type of the product
      */
     private void reorderEmptyProduct(ProductType type) {
-        System.out.println("Reorder 5 * "+type +" because nothing left in fridge");
+        System.out.println("Re-order 5 * "+type +" because nothing left in fridge");
         HashMap<ProductType, Integer> orderMap = new HashMap();
         orderMap.put(type, 5);
         getContext().spawn(OrderProcessor.create(getContext().getSelf()), "re-order"+orderCounter).tell(new OrderNotification(orderMap));
         orderCounter++;
+    }
+
+    private Receipt createReceipt(HashMap<ProductType, Pair<Product, Integer>> productMap) {
+        List<Pair<Product, Integer>> products = new LinkedList<>();
+
+        for (ProductType type : productMap.keySet()){
+            Pair<Product, Integer> pair = productMap.get(type);
+            products.add(pair);
+        }
+        return new Receipt(products);
     }
 }
