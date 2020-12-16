@@ -47,7 +47,7 @@ public class TemperatureSimulator extends AbstractBehavior<TempNotification> {
             currentTemp = currentTemp + calcRandomTemp();
             tempNotification.setTemperature(currentTemp);
             getContext().getSystem().scheduler().scheduleOnce(
-                    Duration.ofMillis(7000),
+                    Duration.ofMillis(15000),
                     () -> getContext().getSelf().tell(tempNotification),
                     getContext().getSystem().dispatchers().lookup(DispatcherSelector.defaultDispatcher()));
             forwardTo.tell(temp);

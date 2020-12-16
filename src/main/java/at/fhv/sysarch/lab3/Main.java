@@ -51,15 +51,9 @@ public class Main {
                         case 1:
                             // inform MediaStation
                             notificationMain.tell(new MediaStationNotification(MediaStation.Actions.START.action));
-
-                            // inform Blinds
-                            notificationMain.tell(new BlindsNotification(Blinds.Actions.CLOSE.action));
                             break;
                         case 2:
                             notificationMain.tell(new MediaStationNotification(MediaStation.Actions.TURN_OFF.action));
-
-                            // inform Blinds
-                            notificationMain.tell(new BlindsNotification(Blinds.Actions.OPEN.action));
                             break;
                     }
 

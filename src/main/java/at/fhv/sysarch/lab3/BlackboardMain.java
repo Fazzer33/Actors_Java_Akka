@@ -32,7 +32,6 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
     public BlackboardMain(ActorContext<INotification> context) {
         super(context);
         //#create-actors
-
         actorRefMap.put(Actor.TEMPERATURE_SENSOR, getContext().spawn(TemperatureSensor.create(getContext().getSelf()), "temperatureSensor"));
         actorRefMap.put(Actor.TEMPERATURE_SIMULATOR, getContext().spawn(TemperatureSimulator.create(actorRefMap.get(Actor.TEMPERATURE_SENSOR)), "tempSimulator"));
 
@@ -103,6 +102,12 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
         System.out.println(command.action);
         BlindsNotification blindsNotification = new BlindsNotification(command.action);
 
+        if (command.action.equals(Blinds.Actions.OPEN.action)) {
+            actorStates.setAreBlindsClosed(false);
+        } else {
+            actorStates.setAreBlindsClosed(true);
+        }
+
         if (actorStates.isMediaStationOn()) {
             blindsNotification.setMediaStationOn();
             blindsNotification.setMSNotification();
@@ -111,20 +116,18 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
 
         actorRefMap.get(Actor.BLINDS).tell(blindsNotification);
 
-        if (command.action.equals(Blinds.Actions.OPEN.action)) {
-            actorStates.setAreBlindsClosed(false);
-        } else {
-            actorStates.setAreBlindsClosed(true);
-        }
-
         return this;
     }
 
     private Behavior<INotification> onMediaStationNotification(MediaStationNotification command) {
         if (command.action.equals(MediaStation.Actions.START.action)) {
             actorStates.setMediaStationOn(true);
+            actorRefMap.get(Actor.BLINDS).tell(new BlindsNotification(Blinds.Actions.CLOSE.action));
+            System.out.println("Mediastation is on: " +actorStates.isMediaStationOn());
         } else {
             actorStates.setMediaStationOn(false);
+            actorRefMap.get(Actor.BLINDS).tell(new BlindsNotification(Blinds.Actions.OPEN.action));
+            System.out.println("Mediastation is on: " +actorStates.isMediaStationOn());
         }
         actorRefMap.get(Actor.MEDIA_STATION).tell(new MediaStationNotification(command.action));
 

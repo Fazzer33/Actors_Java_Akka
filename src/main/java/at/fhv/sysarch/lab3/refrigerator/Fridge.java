@@ -38,8 +38,15 @@ public class Fridge extends AbstractBehavior<INotification> {
     public Fridge(ActorContext<INotification> context) {
         super(context);
         actor = Actor.FRIDGE;
+        // essential products get reordered if empty
         essentialProducts.add(ProductType.APPLE);
         essentialProducts.add(ProductType.MILK);
+
+        // initial products in fridge
+        productsInFridge.put(ProductType.APPLE, new Pair<>(new Product(ProductType.APPLE), 5));
+        productsInFridge.put(ProductType.MILK, new Pair<>(new Product(ProductType.APPLE), 5));
+
+        // add fridge sensors
         productSensor = getContext().spawn(ProductSensor.create(), "productSensor");
         spaceSensor = getContext().spawn(SpaceSensor.create(), "spaceSensor");
     }
@@ -61,7 +68,7 @@ public class Fridge extends AbstractBehavior<INotification> {
 
         if (size <= (MAX_PRODUCTS - currentProducts)
                 && notification.orderWeight <= (MAX_WEIGHT - currentWeight)) {
-            System.out.println("passt super in den Kühli");
+            System.out.println("Order gets placed into the fridge");
             productsInFridge = notification.productMap;
             previousOrders.add(notification.productMap);
 
@@ -81,8 +88,6 @@ public class Fridge extends AbstractBehavior<INotification> {
         if (productsInFridge.get(type) != null) {
             int amount = productsInFridge.get(type).second();
             int consumeAmount = notification.product.second();
-
-            System.out.println(amount);
 
             if (productsInFridge.get(notification.product.first()) == null || amount < consumeAmount) {
                 System.out.println("Too less "+type.name());
@@ -106,6 +111,10 @@ public class Fridge extends AbstractBehavior<INotification> {
         return this;
     }
 
+    /**
+     * Reorders an Product if nothing is left in the fridge
+     * @param type type of the product
+     */
     private void reorderEmptyProduct(ProductType type) {
         System.out.println("Reorder 5 * "+type +" because nothing left in fridge");
         HashMap<ProductType, Integer> orderMap = new HashMap();
