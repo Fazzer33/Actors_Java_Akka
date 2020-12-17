@@ -9,16 +9,16 @@ import akka.actor.typed.javadsl.Receive;
 import akka.japi.Pair;
 import at.fhv.sysarch.lab3.INotification;
 import at.fhv.sysarch.lab3.actors.Actor;
+
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-// In this case the fridge should relay this request to a separate OrderProcessor actor (see Per session child Actor).
-// https://doc.akka.io/docs/akka/current/typed/interaction-patterns.html
-
 public class Fridge extends AbstractBehavior<INotification> {
-    private ActorRef<ProductSensor.Command> productSensor;
-    private ActorRef<FridgeNotification> spaceSensor;
+
+    private ActorRef<INotification> productSensor;
+    private ActorRef<INotification> spaceSensor;
 
     private Actor actor;
     private boolean isEmpty = false;
@@ -54,12 +54,30 @@ public class Fridge extends AbstractBehavior<INotification> {
     @Override
     public Receive<INotification> createReceive() {
         return newReceiveBuilder().
-                onMessage(FridgeNotification.class, this::onNotified).
+                onMessage(FridgeOrderNotification.class, this::onFridgeOrderNotification).
                 onMessage(ConsumeNotification.class, this::onConsume).
-                onMessage(FridgeStatusNotification.class, this::onStatusNotification).build();
+                onMessage(FridgeStatusNotification.class, this::onStatusNotification).
+                onMessage(ProductSensorResponse.class, this::onProductsSensorResponse).
+                onMessage(SpaceSensorResponse.class, this::onSpaceSensorResponse).build();
     }
 
-    private Behavior<INotification> onNotified(FridgeNotification notification) {
+    private static final class ProductSensorResponse implements INotification {
+        public final String message;
+
+        public ProductSensorResponse(String message) {
+            this.message = message;
+        }
+    }
+
+    private static final class SpaceSensorResponse implements INotification {
+        public final String message;
+
+        public SpaceSensorResponse(String message) {
+            this.message = message;
+        }
+    }
+
+    private Behavior<INotification> onFridgeOrderNotification(FridgeOrderNotification notification) {
         int size = 0;
         for (Pair i : notification.productMap.values()) {
             size += (int) i.second();
@@ -74,6 +92,34 @@ public class Fridge extends AbstractBehavior<INotification> {
 
             Receipt receipt = createReceipt(notification.productMap);
             receipt.printAllPrizes();
+            final Duration timeout = Duration.ofSeconds(3);
+            getContext().ask(
+                    ProductSensor.ReturnStoredProductsResponse.class,
+                    productSensor,
+                    timeout,
+                    (ActorRef<ProductSensor.ReturnStoredProductsResponse> ref) -> new ProductSensor.ReturnCurrentAmount(ref),
+                    // adapt the response (or failure to respond)
+                    (response, throwable) -> {
+                        if (response != null) {
+                            return new ProductSensorResponse(response.message);
+                        } else {
+                            return new ProductSensorResponse("Request failed");
+                        }
+                    });
+            getContext().ask(
+                    SpaceSensor.ReturnNewSpaceResponse.class,
+                    spaceSensor,
+                    timeout,
+                    (ActorRef<SpaceSensor.ReturnNewSpaceResponse> ref) -> new SpaceSensor.ReturnNewSpace(ref),
+                    // adapt the response (or failure to respond)
+                    (response, throwable) -> {
+                        if (response != null) {
+                            return new SpaceSensorResponse(response.message);
+                        } else {
+                            return new SpaceSensorResponse("Request failed");
+                        }
+                    });
+
             previousOrders.add(receipt);
 
         } else {
@@ -157,5 +203,15 @@ public class Fridge extends AbstractBehavior<INotification> {
             products.add(pair);
         }
         return new Receipt(products);
+    }
+
+    private Behavior<INotification> onProductsSensorResponse(ProductSensorResponse response) {
+        getContext().getLog().info("Got response from ProductSensor: {}", response.message);
+        return this;
+    }
+
+    private Behavior<INotification> onSpaceSensorResponse(SpaceSensorResponse response) {
+        getContext().getLog().info("Got response from SpaceSensor: {}", response.message);
+        return this;
     }
 }

@@ -37,7 +37,7 @@ public class OrderProcessor extends AbstractBehavior<OrderNotification> {
             productMap.put(product.getType(), new Pair<>(product, notification.orderMap.get(key)));
         }
 
-        forwardTo.tell(new FridgeNotification(productMap, orderWeight));
+        forwardTo.tell(new FridgeOrderNotification(productMap, orderWeight));
         return Behaviors.stopped();
     }
 }
