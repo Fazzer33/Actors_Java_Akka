@@ -38,12 +38,10 @@ public class MediaStation extends AbstractBehavior<MediaStationNotification> {
         if (notification.action.equals(Actions.TURN_OFF.action) && isPlaying) {
             isPlaying = false;
             System.out.println("MediaStation turning off...");
-            getContext().getLog().info(notification.action);
             return this;
         } else if (notification.action.equals(Actions.START.action) && !isPlaying) {
             isPlaying = true;
             System.out.println("MediaStation is starting...");
-            getContext().getLog().info(notification.action);
             return this;
         } else {
             return this;

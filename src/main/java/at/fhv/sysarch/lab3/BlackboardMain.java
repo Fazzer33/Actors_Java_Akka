@@ -66,6 +66,7 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
             tempNotification.acIsOn();
             tempNotification.setAcNotification();
             tempNotification.setTemperature(command.getTemperature());
+            actorStates.setAcOn(true);
             actorRefMap.get(Actor.TEMPERATURE_SIMULATOR).tell(tempNotification);
             actorRefMap.get(Actor.AC).tell(new ACNotification(AC.Actions.AC_ON.action));
 
@@ -75,6 +76,7 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
             tempNotification.acIsOff();
             tempNotification.setAcNotification();
             tempNotification.setTemperature(command.getTemperature());
+            actorStates.setAcOn(false);
             actorRefMap.get(Actor.TEMPERATURE_SIMULATOR).tell(tempNotification);
             actorRefMap.get(Actor.AC).tell(new ACNotification(AC.Actions.AC_OFF.action));
         }

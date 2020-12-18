@@ -5,7 +5,6 @@ import akka.japi.Pair;
 import at.fhv.sysarch.lab3.mediaStation.MediaStation;
 import at.fhv.sysarch.lab3.mediaStation.MediaStationNotification;
 import at.fhv.sysarch.lab3.refrigerator.*;
-
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -13,7 +12,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         boolean running = true;
         //#actor-system
         final ActorSystem<INotification> notificationMain = ActorSystem.create(BlackboardMain.create(), "automationSystem");
@@ -23,6 +22,8 @@ public class Main {
 
         int line = 0;
         while (running) {
+            // Thread sleep that it waits until everything is printed before doing new actions
+            Thread.sleep(1000);
             System.out.println("Please tell me what you wan't to do");
             System.out.println("------------------------------------");
             System.out.println("Press numbers for Options:");
@@ -60,7 +61,8 @@ public class Main {
                     System.out.println("What do you want?");
                     System.out.println("1 - Order:");
                     System.out.println("2 - Consume:");
-                    System.out.println("3 - Fridge Status:");
+                    System.out.println("3 - Show Current Products in Fridge");
+                    System.out.println("4 - Show Order History");
 
                     line = sc.nextInt();
 
@@ -103,7 +105,7 @@ public class Main {
                                         orders.put(ProductType.EGGS, amount);
                                         break;
                                     case 4:
-                                        System.out.println("How many ham packages (1 package = 0.2 kg");
+                                        System.out.println("How many ham packages (1 package = 0.2 kg)");
                                         amount = sc.nextInt();
                                         orders.put(ProductType.HAM, amount);
                                         break;
@@ -180,22 +182,15 @@ public class Main {
                             }
                             break;
 
-                        // Fridge Status
+                        // Show Products in Fridge
                         case 3:
+                            notificationMain.tell(new FridgeStatusNotification(FridgeStatusNotification.Actions.CURRENT_PRODUCTS.action));
+                            break;
 
-                            System.out.println("Choose action:");
-                            System.out.println("1 - Show Current Products in Fridge");
-                            System.out.println("2 - Show Order History");
-                            line = sc.nextInt();
-
-                            switch (line) {
-                                case 1:
-                                    notificationMain.tell(new FridgeStatusNotification(FridgeStatusNotification.Actions.CURRENT_PRODUCTS.action));
-                                    break;
-                                case 2:
-                                    notificationMain.tell(new FridgeStatusNotification(FridgeStatusNotification.Actions.ORDER_HISTORY.action));
-                                    break;
-                            }
+                        // Order History
+                        case 4:
+                            notificationMain.tell(new FridgeStatusNotification(FridgeStatusNotification.Actions.ORDER_HISTORY.action));
+                            break;
                     }
                     break;
 

@@ -22,7 +22,7 @@ public class Fridge extends AbstractBehavior<INotification> {
 
     private Actor actor;
     private boolean isEmpty = false;
-    private final int MAX_PRODUCTS = 30;
+    private final int MAX_PRODUCTS = 60;
     private final double MAX_WEIGHT = 60;
     private double currentWeight = 0;
     private int currentProductAmount = 0;
