@@ -23,6 +23,26 @@ public class Product {
             this.weight = 1;
             this.price = 0.80;
         }
+
+        if (this.type == ProductType.HAM) {
+            this.weight = 0.20;
+            this.price = 3.00;
+        }
+
+        if (this.type == ProductType.EGGS) {
+            this.weight = 0.1;
+            this.price = 0.2;
+        }
+
+        if (this.type == ProductType.COKE) {
+            this.weight = 1;
+            this.price = 1.50;
+        }
+
+        if (this.type == ProductType.BEER) {
+            this.weight = 0.5;
+            this.price = 0.80;
+        }
     }
 
     public ProductType getType() {

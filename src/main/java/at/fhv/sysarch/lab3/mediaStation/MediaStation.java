@@ -35,8 +35,6 @@ public class MediaStation extends AbstractBehavior<MediaStationNotification> {
     }
 
     private Behavior<MediaStationNotification> onNotified(MediaStationNotification notification) {
-        System.out.println("test");
-        System.out.println(notification.action);
         if (notification.action.equals(Actions.TURN_OFF.action) && isPlaying) {
             isPlaying = false;
             System.out.println("MediaStation turning off...");

@@ -38,14 +38,12 @@ public class WeatherSimulator extends AbstractBehavior<WeatherNotification> {
         weatherNotification.setWeather(weather);
 
         getContext().getSystem().scheduler().scheduleOnce(
-                Duration.ofMillis(15000),
+                Duration.ofMillis(30000),
                 () -> getContext().getSelf().tell(weatherNotification),
                 getContext().getSystem().dispatchers().lookup(DispatcherSelector.defaultDispatcher()));
 
         value.setWeather(weather);
         forwardTo.tell(value);
-
-        System.out.println(weather);
 
         return Behaviors.same();
     }

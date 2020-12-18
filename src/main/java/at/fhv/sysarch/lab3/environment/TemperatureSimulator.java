@@ -41,13 +41,11 @@ public class TemperatureSimulator extends AbstractBehavior<TempNotification> {
         if (temp.checkOnAcNotification()) {
             isAcOn = temp.checkIfAcOn();
         } else {
-            System.out.println(temp.checkIfAcOn());
-
             TempNotification tempNotification = new TempNotification();
             currentTemp = currentTemp + calcRandomTemp();
             tempNotification.setTemperature(currentTemp);
             getContext().getSystem().scheduler().scheduleOnce(
-                    Duration.ofMillis(15000),
+                    Duration.ofMillis(20000),
                     () -> getContext().getSelf().tell(tempNotification),
                     getContext().getSystem().dispatchers().lookup(DispatcherSelector.defaultDispatcher()));
             forwardTo.tell(temp);
@@ -56,7 +54,6 @@ public class TemperatureSimulator extends AbstractBehavior<TempNotification> {
     }
 
     private Double calcRandomTemp() {
-        System.out.println("ac on?: "+isAcOn);
         double MIN = -1;
         double MAX = 1;
         Random random = new Random();

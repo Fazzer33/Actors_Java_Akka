@@ -25,7 +25,7 @@ public class ActorStates {
         isMediaStationOn = mediaStationOn;
     }
 
-    public boolean isAreBlindsClosed() {
+    public boolean areBlindsClosed() {
         return areBlindsClosed;
     }
 
@@ -47,5 +47,29 @@ public class ActorStates {
 
     public void setWeather(Weather weather) {
         this.weather = weather;
+    }
+
+    public String getBlindsState() {
+        if (areBlindsClosed()) {
+            return "closed";
+        } else {
+            return "open";
+        }
+    }
+
+    public String getMediaStationState() {
+        if (isMediaStationOn) {
+            return "on";
+        } else {
+            return "off";
+        }
+    }
+
+    public String getACState() {
+        if (isAcOn) {
+            return "on";
+        } else {
+            return "off";
+        }
     }
 }

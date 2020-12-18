@@ -22,7 +22,7 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
 
     // save actor refs
     public HashMap<Actor, ActorRef> actorRefMap = new HashMap<>();
-    public ActorStates actorStates = new ActorStates();
+    public static ActorStates actorStates = new ActorStates();
     private int orderCounter = 1;
 
     public static Behavior<INotification> create() {
@@ -44,6 +44,7 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
 
         actorRefMap.put(Actor.FRIDGE, getContext().spawn(Fridge.create(), "fridge"));
         //#create-actors
+
     }
 
     @Override
@@ -51,9 +52,7 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
         return newReceiveBuilder().
                 onMessage(TempNotification.class, this::onTempNotification).
                 onMessage(WeatherNotification.class, this::onWeatherNotification).
-                onMessage(BlindsNotification.class, this::onBlindsNotification).
                 onMessage(MediaStationNotification.class, this::onMediaStationNotification).
-                onMessage(ACNotification.class, this::onACNotification).
                 onMessage(OrderNotification.class, this::onOrderNotification).
                 onMessage(ConsumeNotification.class, this::onConsumeNotification).
                 onMessage(FridgeStatusNotification.class, this::onFridgeStatusNotification).build();
@@ -61,8 +60,6 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
 
     private Behavior<INotification> onTempNotification(TempNotification command) {
         actorStates.setCurrentTemperature(command.getTemperature());
-
-        System.out.println(command.getTemperature());
 
         if (command.getTemperature() >= 20) {
             TempNotification tempNotification = new TempNotification();
@@ -98,45 +95,18 @@ public class BlackboardMain extends AbstractBehavior<INotification> {
         return this;
     }
 
-    private Behavior<INotification> onBlindsNotification(BlindsNotification command) {
-
-        System.out.println(command.action);
-        BlindsNotification blindsNotification = new BlindsNotification(command.action);
-
-        if (command.action.equals(Blinds.Actions.OPEN.action)) {
-            actorStates.setAreBlindsClosed(false);
-        } else {
-            actorStates.setAreBlindsClosed(true);
-        }
-
-        if (actorStates.isMediaStationOn()) {
-            blindsNotification.setMediaStationOn();
-            blindsNotification.setMSNotification();
-            actorRefMap.get(Actor.BLINDS).tell(blindsNotification);
-        }
-
-        actorRefMap.get(Actor.BLINDS).tell(blindsNotification);
-
-        return this;
-    }
-
     private Behavior<INotification> onMediaStationNotification(MediaStationNotification command) {
         if (command.action.equals(MediaStation.Actions.START.action)) {
             actorStates.setMediaStationOn(true);
             actorRefMap.get(Actor.BLINDS).tell(new BlindsNotification(Blinds.Actions.CLOSE.action));
-            System.out.println("Mediastation is on: " +actorStates.isMediaStationOn());
+            actorStates.setAreBlindsClosed(true);
         } else {
             actorStates.setMediaStationOn(false);
             actorRefMap.get(Actor.BLINDS).tell(new BlindsNotification(Blinds.Actions.OPEN.action));
-            System.out.println("Mediastation is on: " +actorStates.isMediaStationOn());
+            actorStates.setAreBlindsClosed(false);
         }
         actorRefMap.get(Actor.MEDIA_STATION).tell(new MediaStationNotification(command.action));
 
-        return this;
-    }
-
-    private Behavior<INotification> onACNotification(ACNotification notification) {
-        // should the user be able to turn ac on/off ? or just automatic
         return this;
     }
 

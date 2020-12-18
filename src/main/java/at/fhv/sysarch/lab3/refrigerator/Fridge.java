@@ -25,7 +25,7 @@ public class Fridge extends AbstractBehavior<INotification> {
     private final int MAX_PRODUCTS = 30;
     private final double MAX_WEIGHT = 60;
     private double currentWeight = 0;
-    private int currentProducts = 0;
+    private int currentProductAmount = 0;
     private int orderCounter = 0;
     private List<ProductType> essentialProducts = new LinkedList<>();
     private HashMap<ProductType, Pair<Product,Integer>> productsInFridge = new HashMap<>();
@@ -41,10 +41,8 @@ public class Fridge extends AbstractBehavior<INotification> {
         // essential products get reordered if empty
         essentialProducts.add(ProductType.APPLE);
         essentialProducts.add(ProductType.MILK);
-
-        // initial products in fridge
-        productsInFridge.put(ProductType.APPLE, new Pair<>(new Product(ProductType.APPLE), 5));
-        productsInFridge.put(ProductType.MILK, new Pair<>(new Product(ProductType.APPLE), 5));
+        essentialProducts.add(ProductType.EGGS);
+        essentialProducts.add(ProductType.HAM);
 
         // add fridge sensors
         productSensor = getContext().spawn(ProductSensor.create(), "productSensor");
@@ -62,18 +60,18 @@ public class Fridge extends AbstractBehavior<INotification> {
     }
 
     private static final class ProductSensorResponse implements INotification {
-        public final String message;
+        public final int newAmount;
 
-        public ProductSensorResponse(String message) {
-            this.message = message;
+        public ProductSensorResponse(int newAmount) {
+            this.newAmount = newAmount;
         }
     }
 
     private static final class SpaceSensorResponse implements INotification {
-        public final String message;
+        public final double newWeight;
 
-        public SpaceSensorResponse(String message) {
-            this.message = message;
+        public SpaceSensorResponse(double newWeight) {
+            this.newWeight = newWeight;
         }
     }
 
@@ -83,12 +81,18 @@ public class Fridge extends AbstractBehavior<INotification> {
             size += (int) i.second();
         }
 
-        System.out.println(size);
-
-        if (size <= (MAX_PRODUCTS - currentProducts)
+        if (size <= (MAX_PRODUCTS - currentProductAmount)
                 && notification.orderWeight <= (MAX_WEIGHT - currentWeight)) {
             System.out.println("Order gets placed into the fridge");
-            productsInFridge = notification.productMap;
+            for (ProductType product : notification.productMap.keySet()) {
+                if (productsInFridge.get(product) != null) {
+                    int oldValue = productsInFridge.get(product).second();
+                    productsInFridge.put(product, new Pair(notification.productMap.get(product).first(),
+                            oldValue + notification.productMap.get(product).second()));
+                } else {
+                    productsInFridge.put(product, notification.productMap.get(product));
+                }
+            }
 
             Receipt receipt = createReceipt(notification.productMap);
             receipt.printAllPrizes();
@@ -97,26 +101,28 @@ public class Fridge extends AbstractBehavior<INotification> {
                     ProductSensor.ReturnStoredProductsResponse.class,
                     productSensor,
                     timeout,
-                    (ActorRef<ProductSensor.ReturnStoredProductsResponse> ref) -> new ProductSensor.ReturnCurrentAmount(ref),
+                    (ActorRef<ProductSensor.ReturnStoredProductsResponse> ref) ->
+                            new ProductSensor.ReturnCurrentAmount(ref, notification.productMap, currentProductAmount),
                     // adapt the response (or failure to respond)
                     (response, throwable) -> {
                         if (response != null) {
-                            return new ProductSensorResponse(response.message);
+                            return new ProductSensorResponse(response.newAmount);
                         } else {
-                            return new ProductSensorResponse("Request failed");
+                            return new ProductSensorResponse(currentProductAmount);
                         }
                     });
             getContext().ask(
                     SpaceSensor.ReturnNewSpaceResponse.class,
                     spaceSensor,
                     timeout,
-                    (ActorRef<SpaceSensor.ReturnNewSpaceResponse> ref) -> new SpaceSensor.ReturnNewSpace(ref),
+                    (ActorRef<SpaceSensor.ReturnNewSpaceResponse> ref) ->
+                            new SpaceSensor.ReturnNewSpace(ref, notification.productMap, currentWeight),
                     // adapt the response (or failure to respond)
                     (response, throwable) -> {
                         if (response != null) {
-                            return new SpaceSensorResponse(response.message);
+                            return new SpaceSensorResponse(response.newWeight);
                         } else {
-                            return new SpaceSensorResponse("Request failed");
+                            return new SpaceSensorResponse(currentWeight);
                         }
                     });
 
@@ -125,7 +131,7 @@ public class Fridge extends AbstractBehavior<INotification> {
         } else {
             System.out.println("Too much weight or too less space in the fridge");
             System.out.println("Available Weight: " + (MAX_WEIGHT - currentWeight));
-            System.out.println("Available Space: " + (MAX_PRODUCTS - currentProducts));
+            System.out.println("Available Space: " + (MAX_PRODUCTS - currentProductAmount));
             System.out.println();
             System.out.println("Order: Weight: " + notification.orderWeight);
             System.out.println("Space: " + size);
@@ -206,12 +212,14 @@ public class Fridge extends AbstractBehavior<INotification> {
     }
 
     private Behavior<INotification> onProductsSensorResponse(ProductSensorResponse response) {
-        getContext().getLog().info("Got response from ProductSensor: {}", response.message);
+        currentProductAmount = response.newAmount;
+        getContext().getLog().info("Got response from ProductSensor - new Amount of Products: {}", currentProductAmount);
         return this;
     }
 
     private Behavior<INotification> onSpaceSensorResponse(SpaceSensorResponse response) {
-        getContext().getLog().info("Got response from SpaceSensor: {}", response.message);
+        currentWeight = response.newWeight;
+        getContext().getLog().info("Got response from SpaceSensor - new Weight in the fridge: {} kg", currentWeight);
         return this;
     }
 }
